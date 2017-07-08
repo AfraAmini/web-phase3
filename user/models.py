@@ -8,7 +8,7 @@ from user.managers import UserManager
 class BlogUser(AbstractUser):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    password = models.CharField(max_length=20)
+    # password = models.CharField(max_length=20)
     email = models.EmailField(unique=True)
     # first_blog = models.ForeignKey(Blog, null=True)
 
@@ -34,7 +34,7 @@ class BlogUser(AbstractUser):
         return "{} {} {}".format(self.first_name, self.last_name, self.email)
 
     def save(self, *args, **kwargs):
-        self.username = self.email
+        self.email = self.username
         return super(BlogUser, self).save(*args, **kwargs)
 
 

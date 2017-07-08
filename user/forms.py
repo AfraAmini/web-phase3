@@ -11,7 +11,7 @@ class UserForm(forms.Form):
 
     def clean(self):
         cleaned_data = super(UserForm, self).clean()
-        q = BlogUser.objects.filter(email=cleaned_data.get("email")).count();
+        q = BlogUser.objects.filter(email=cleaned_data.get("email")).count()
         if q > 0:
             raise forms.ValidationError("This email has been used before")
         return cleaned_data
