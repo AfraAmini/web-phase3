@@ -2,8 +2,8 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 
-from blog.forms import PostForm
-from blog.models import Post, Blog
+from blog.forms import PostForm, CommentForm
+from blog.models import Post, Blog, Comment
 from user.views import login_required
 
 
@@ -48,4 +48,40 @@ def blog_post(request, blog_id):
             return JsonResponse({'status': -1, 'message': 'can not be empty'})
 
 
+@login_required
+def blog_comments(request, blog_id):
+    if 'post_id' not in request.GET:
+        return JsonResponse({'status': -1, 'message': 'can not be empty'}, status=404)
 
+    offset = int(request.GET.get('offset', 0))
+    if 'count' in request.GET:
+        count = int(request.GET.get('count'))
+        comments = Comment.objects.filter(post__blog_id=blog_id, post_id=request.GET.get('post_id'))[
+                   offset: offset + count]
+    else:
+        comments = Comment.objects.filter(post__blog_id=blog_id, post_id=request.GET.get('post_id'))[offset:]
+    results = []
+    for comment in comments:
+        results.append({'datetime': comment.datetime.strftime('%a %b %d %H:%M:%S %Y'), 'text': comment.text, })
+    return JsonResponse({'status': 0, 'comments': results})
+
+
+@csrf_exempt
+@login_required
+def blog_comment(request, blog_id):
+    if request.method == 'POST':
+        if 'post_id' not in request.POST:
+            return JsonResponse({'status': -1, 'message': 'can not be empty'}, status=404)
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            try:
+                post = Post.objects.get(id=request.POST.get('post_id'), blog_id=blog_id)
+                print(post)
+            except:
+                return JsonResponse({'status': -1, 'message': 'post does not exist'}, status=404)
+            newCommment = Comment(text=form.cleaned_data['text'], post=post)
+            newCommment.save()
+            return JsonResponse({'status': 0, 'comment': {'datetime': newCommment.datetime.strftime('%a %b %d %H:%M:%S %Y'),
+                                                          'text': newCommment.text}})
+        else:
+            return JsonResponse({'status': -1, 'message': 'can not be empty'})
