@@ -34,7 +34,18 @@ class BlogUser(AbstractUser):
         return "{} {} {}".format(self.first_name, self.last_name, self.email)
 
     def save(self, *args, **kwargs):
+
         self.email = self.username
-        return super(BlogUser, self).save(*args, **kwargs)
+        result = super(BlogUser, self).save(*args, **kwargs)
+
+        # create new blog for each user
+        from blog.models import Blog
+
+        number_of_blogs = Blog.objects.filter(user = self).count()
+        if number_of_blogs == 0:
+            newBlog = Blog(user=self)
+            newBlog.save()
+
+        return result
 
 

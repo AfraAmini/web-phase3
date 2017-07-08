@@ -1,11 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.forms import UserChangeForm, UserCreationForm
-
-from user import models
-from blog import models as blogModel
+from django.contrib.auth.forms import UserCreationForm
 from django.utils.translation import ugettext_lazy as _
 
+from blog import models as blogModel
+from user import models
 from user.models import BlogUser
 
 
@@ -23,24 +22,29 @@ class AuthorName(admin.SimpleListFilter):
         print(self.value())
         return queryset.filter(user__first_name=self.value(), user__last_name=self.value())
 
-class BlogUserCreationForm(UserCreationForm):
 
+class BlogUserCreationForm(UserCreationForm):
     class Meta:
         model = BlogUser
-        fields = ('username', 'first_name' , 'last_name', )
+        fields = ('username', 'first_name', 'last_name',)
 
 
 class BlogUserAdmin(UserAdmin):
     add_form = BlogUserCreationForm
-    prepopulated_fields = {'username': ('first_name' , 'last_name', )}
 
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('first_name', 'last_name', 'username', 'password1', 'password2', ),
+            'fields': ('first_name', 'last_name', 'username', 'password1', 'password2',),
         }),
     )
 
+    fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('first_name', 'last_name', 'email',),
+        }),
+    )
 
 
 # class BlogUserAdmin(UserAdmin):

@@ -29,13 +29,11 @@ class RegisterView(View):
             newUser.username = form.cleaned_data['email']
             newUser.save()
 
-            #create new blog for each user
-            newBlog = Blog(user = newUser)
-            newBlog.save()
-
             return JsonResponse({"status": 0})
-        print((form.errors['__all__']))
-        return JsonResponse({"status": -1, "message": form.errors['__all__'][0]})
+        if form.non_field_errors():
+            return JsonResponse({'status': -1, 'message': form.non_field_errors()[0]}, status=404)
+        else:
+            return JsonResponse({'status': -1, 'message': "can't be empty"}, status=404)
 
 
 class LoginView(View):
@@ -58,7 +56,7 @@ def test(request):
     print(request.user.is_authenticated())
     return HttpResponse("asdfad")
 
-def login_decorator(func):
+def login_required(func):
     def decorated(request, *args, **kwargs):
         if not request.user.is_authenticated():
             return JsonResponse({'status': -1, 'message': 'no/wrong token'})
@@ -68,7 +66,7 @@ def login_decorator(func):
 
 
 @csrf_exempt
-@login_decorator
+@login_required
 def blogid(request):
     blogs = Blog.objects.filter(user = request.user).order_by('created_date')
     if(len(blogs) > 0):
