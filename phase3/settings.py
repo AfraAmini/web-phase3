@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 from corsheaders.defaults import default_headers
-
+import raven
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'user',
-    'blog'
+    'blog',
+    'raven.contrib.django.raven_compat'
 ]
 #
 MIDDLEWARE = [
@@ -125,3 +126,11 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_HEADERS = default_headers + (
     'X-Token',
 )
+
+RAVEN_CONFIG = {
+    'dsn': 'http://1c9149df9efc469880ebfca55000ff78:6600de0f248141c0bc4f1b6ebe814db3@45.32.236.171:8080/2',
+    # If you are using git, you can also automatically configure the
+    # release based on the git info.
+    'release': raven.fetch_git_sha(os.path.dirname(os.pardir)),
+}
+
